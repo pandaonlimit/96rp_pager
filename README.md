@@ -1,7 +1,7 @@
 # 96rp_pager
 Upgraded Pager script from tugamars by me, panda :)<br>
-Everybody is free to use and modify this script!
-Credits for the original creator and me would be nice ofc :D
+Everybody is free to use and modify this script!<br>
+Credits for the original creator and me would be nice ofc :D<br>
 (QBX)
 
 Current functions:
