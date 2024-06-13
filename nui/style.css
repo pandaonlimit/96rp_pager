@@ -1,0 +1,115 @@
+@font-face {
+    font-family: "DSDigi";
+    src: url("ds-digi.ttf") format("truetype");
+}
+
+#pager {
+    width: 405px;
+    height: 275px;
+    background-image: url("pager.png");
+    background-size: cover;
+    position: absolute;
+    bottom: 5px;
+    right: 5px;
+    display: none;
+}
+
+#text {
+    font-family: DSDigi;
+    text-transform: uppercase;
+    position: relative;
+    width: 290px;
+    height: 79px;
+    top: 70px;
+    left: 46px;
+    z-index: 2;
+    padding: 5px;
+    font-size: 27px;
+    word-wrap: break-word;
+    overflow-y: scroll;
+}
+#text::-webkit-scrollbar {
+    display: none;
+}
+
+button {
+    background:none;
+    border:0;
+    z-index: 2;
+}
+
+#saveContact {
+    /* font-family: DSDigi;
+    font-size: 27px; */
+    position: absolute;
+    left: 46px;
+    top: 70px;
+    width: 290px;
+    height: 20px;
+    /* color: white;
+    border: 0px;
+    background:none;
+    outline: none; */
+    z-index: 3;
+}
+
+#reminder {
+    display: none;
+    position: absolute;
+    color: white;
+    bottom: 80px;
+    left: 45px;
+    width: 60px;
+    height: 20px;
+    font-size: 15px;
+    text-align: center;
+    z-index: 1;
+}
+
+#button-close {
+    position: absolute;
+    bottom: 62px;
+    left: 125px;
+    width: 60px;
+    height: 20px;
+}
+
+#button-interact {
+    position: absolute;
+    bottom: 62px;
+    left:50px;
+    width: 60px;
+    height: 20px;
+}
+
+#button-up {
+    position: absolute;
+    bottom: 48px;
+    right: 80px;
+    width: 70px;
+    height: 20px;
+}
+
+#button-left {
+    position: absolute;
+    bottom: 22px;
+    right: 157px;
+    width: 30px;
+    height: 40px;
+}
+
+#button-right {
+    position: absolute;
+    bottom: 22px;
+    right: 42px;
+    width: 30px;
+    height: 40px;
+}
+
+#button-down {
+    position: absolute;
+    bottom: 15px;
+    right: 80px;
+    width: 70px;
+    height: 20px;
+}
