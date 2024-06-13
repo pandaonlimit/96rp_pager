@@ -1,9 +1,11 @@
 # 96rp_pager
 Upgraded Pager script from tugamars by me, panda :)
+(QBX)
 
 Current functions:
 - can write messages via number or contact name
 - can save contacts
+
 Comming soon:
 - basic functions from original script by tugamars (dispatches)
 - UI upgrades
@@ -15,3 +17,4 @@ TODO:
 - send messages while players are offline
 - more sound effects
 - more quallity of life functions
+- upgrade to qbx and other frameworks
