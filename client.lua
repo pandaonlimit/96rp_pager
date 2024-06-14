@@ -103,6 +103,10 @@ function ShowContact(contact)
     currentMessage = #messages + 1
 end
 
+AddEventHandler('QBCore:Client:OnPlayerLoaded', function() 
+    GetPagerData()
+end)
+
 --------------------------------------------------------------------------
 -- Gets triggered, when the resource starts 
 -- (examples: player joins server, script restart)
@@ -111,6 +115,7 @@ AddEventHandler('onResourceStart', function(resourceName)
     if (GetCurrentResourceName() ~= resourceName) then
         return
     end
+    print("resource started")
     GetPagerData()
 end)
 

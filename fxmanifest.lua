@@ -10,7 +10,8 @@ author 'pandaonlimit'
 shared_script {
     '@ox_lib/init.lua',
     '@qbx_core/modules/lib.lua',
-    "config.lua"
+    '@qbx_core/modules/playerdata.lua',
+    "config.lua",
 }
 
 server_scripts {
@@ -20,7 +21,6 @@ server_scripts {
 
 client_scripts {
     "client.lua",
-    "script.js"
 } 
 
 ui_page 'nui/index.html'

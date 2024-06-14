@@ -94,7 +94,6 @@ QBCore.Functions.CreateCallback('96rp-pager:server:GetPagerData', function(sourc
     do
         Wait(100)
     end
-    print(json.encode(pagersList[citizenid]))
     cb(pagersList[citizenid])
 end)
 
