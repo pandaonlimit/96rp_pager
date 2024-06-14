@@ -12,8 +12,8 @@ Right now, you can only use it with QBX-Core.<br>
 <p>
 Feel free to join our discord and support us if u want to :)<br>
 We dont sell anything and want to offer free scripts in the near future<br>
-<h1><a href="https://discord.gg/96rp">discord.gg/96rp</a></h1>
 </p>
+<h1><a href="https://discord.gg/96rp">discord.gg/96rp</a></h1>
 Current functions:
 - can write messages via number or contact name
 - can save contacts
