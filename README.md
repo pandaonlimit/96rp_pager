@@ -1,5 +1,5 @@
 # 96rp_pager
-<h2>Upgraded Pager script from tugamars by me, panda :)</h2>h2>
+<h2>Upgraded Pager script from tugamars by me, panda :)</h2>
 Everybody is free to use and modify this script!<br>
 Credits for the original creator and me would be nice ofc :D<br>
 
