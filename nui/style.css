@@ -39,13 +39,17 @@ button {
 }
 
 #saveContact {
-    /* font-family: DSDigi;
-    font-size: 27px; */
+    font-family: DSDigi;
+    font-size: 27px;
     position: absolute;
-    left: 46px;
-    top: 70px;
+    left: 50px;
+    top: 70.5px;
     width: 290px;
-    height: 20px;
+    height: 30px;
+    text-transform: uppercase;
+    background-color: #4e9e71;
+    border: 0px;
+    outline: none;
     /* color: white;
     border: 0px;
     background:none;

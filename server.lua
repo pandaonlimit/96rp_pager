@@ -1,29 +1,35 @@
 local pagersList = {}
 
-local QBCore = exports['qb-core']:GetCoreObject()
-
+--------------------------------------------------------------------------
+-- Get pager data after a player joined and finished loaded
+--------------------------------------------------------------------------
 RegisterNetEvent('QBCore:Server:OnPlayerLoaded', function() 
     local citizenId = exports.qbx_core:GetPlayer(source).PlayerData.citizenid
     GetPagerData(citizenId, source)
 end)
 
+--------------------------------------------------------------------------
+-- Loads pager data for every player ingame on resource start
+-- (usefull when u restart this script live)
+--------------------------------------------------------------------------
 AddEventHandler('onResourceStart', function(resourceName)
     if (GetCurrentResourceName() ~= resourceName) then
       return
     end
     local players = exports.qbx_core:GetQBPlayers()
-    for id, obj in pairs(players)
-    do
+    for id, obj in pairs(players) do
         local citizenid = exports.qbx_core:GetPlayer(id).PlayerData.citizenid
         GetPagerData(citizenid, id)
     end
 end)
 
+--------------------------------------------------------------------------
+-- Returns max id from table and returns MAX(id) + 1 as a new id
+--------------------------------------------------------------------------
 function GetNewID(tableName)
     local row = MySQL.single.await('SELECT MAX(id) FROM ' .. tableName)
     local newid = row['MAX(id)']
-    if newid ~= nil
-    then
+    if newid ~= nil then
         newid = tonumber(newid) + 1
     else
         newid = 0
@@ -31,11 +37,14 @@ function GetNewID(tableName)
     return newid
 end
 
+--------------------------------------------------------------------------
+-- Returns players number if given
+-- else, creates a new number
+--------------------------------------------------------------------------
 function GetNumber(citizenid)
     local usersRow = MySQL.single.await('SELECT number FROM pager_users WHERE citizenid = ?', {citizenid})
     local number = ''
-    if usersRow == nil
-    then
+    if usersRow == nil then
         local newNumber = CreateRandomNumber()
         MySQL.insert.await('INSERT INTO pager_users (citizenid, number) VALUES (?, ?)', {citizenid, newNumber})
         number = newNumber
@@ -45,17 +54,25 @@ function GetNumber(citizenid)
     return number
 end
 
+--------------------------------------------------------------------------
+-- Returns all messages the player has
+--------------------------------------------------------------------------
 function GetMessages(citizenid)
     local response = MySQL.query.await('SELECT pager_messages.message as text, pager_users.number FROM pager_messages, pager_messages_users, pager_users WHERE pager_messages_users.user = ? AND pager_messages.id = pager_messages_users.message AND pager_users.citizenid = pager_messages.user', {citizenid})
     return response
 end
 
+--------------------------------------------------------------------------
+-- Returns all contacts the player has
+--------------------------------------------------------------------------
 function GetContacts(citizenid)
-    local response = MySQL.query.await('SELECT pager_contacts.name, pager_users.number FROM pager_contacts, pager_contacts_users, pager_users WHERE pager_contacts_users.user = ? AND pager_contacts.id = pager_contacts_users.contact AND pager_users.citizenid = pager_contacts.user', {citizenid})
+    local response = MySQL.query.await('SELECT pager_contacts.name, pager_users.number, pager_contacts.user FROM pager_contacts, pager_contacts_users, pager_users WHERE pager_contacts_users.user = ? AND pager_contacts.id = pager_contacts_users.contact AND pager_users.citizenid = pager_contacts.user', {citizenid})
     return response
 end
 
-
+--------------------------------------------------------------------------
+-- Saves pager data and players serverid inside pagerList variable
+--------------------------------------------------------------------------
 function GetPagerData(citizenid, serverid)
     local number = GetNumber(citizenid)
     local contacts = GetContacts(citizenid)
@@ -68,14 +85,15 @@ function GetPagerData(citizenid, serverid)
     }
 end
 
---creates a random number for the pager
+--------------------------------------------------------------------------
+-- Creates a random number for new players
+--------------------------------------------------------------------------
 function CreateRandomNumber()
     local number = ""
     local maxChars = 8
     local count = 1
     
-    while count <= maxChars
-    do
+    while count <= maxChars do
         number = number ..math.random(9)
         count = count + 1
     end
@@ -83,50 +101,123 @@ function CreateRandomNumber()
     return number
 end
 
-
-QBCore.Functions.CreateCallback('96rp-pager:server:GetPagerData', function(source, cb)
-    while exports.qbx_core:GetPlayer(source) == nil
-    do
+--------------------------------------------------------------------------
+-- Callback to get pager data from server
+--------------------------------------------------------------------------
+lib.callback.register('96rp-pager:server:GetPagerData', function(source)
+    while exports.qbx_core:GetPlayer(source) == nil do
         Wait(100)
     end
     local citizenid = exports.qbx_core:GetPlayer(source).PlayerData.citizenid
-    while pagersList[citizenid] == nil
-    do
+    while pagersList[citizenid] == nil do
         Wait(100)
     end
-    cb(pagersList[citizenid])
+    return pagersList[citizenid]
 end)
 
+--------------------------------------------------------------------------
+-- Command for texting other players
+--------------------------------------------------------------------------
 RegisterCommand("pager", function(source, args, rawCommand)
     local citizenid = exports.qbx_core:GetPlayer(source).PlayerData.citizenid
     local pagerUser = pagersList[citizenid]
-    local number = tonumber(args[1])
-    if number == nil
-    then
-        local row = MySQL.single.await('SELECT pager_contacts.user FROM pager_contacts, pager_contacts_users WHERE pager_contacts.name = ? AND pager_contacts_users.user = ? AND pager_contacts.id = pager_contacts_users.contact', {args[1], citizenid})
-        if row ~= nil
-        then
-            number = pagersList[row['user']].number
+    local contact = args[1]
+    if not tonumber(contact) then
+        for _, contactData in pairs(pagerUser.contacts) do
+            if contactData.name == contact then
+                contact = contactData.number
+            end
         end
     end
     local message = args[2]
-
     for i = 3, #args
     do
         message = message .. " " .. args[i]
     end
-    for currentCitizenid, values in pairs(pagersList)
-    do
-        if values.number == tonumber(number)
-        then
+    local userFound = false
+    for currentCitizenid, values in pairs(pagersList) do
+        if values.number == tonumber(contact) then
             local newID = GetNewID('pager_messages')
             MySQL.insert.await('INSERT INTO pager_messages (id, message, user) VALUES (?, ?, ?)', {newID , message, citizenid})
             MySQL.insert.await('INSERT INTO pager_messages_users (user, message) VALUES (?, ?)', {currentCitizenid, newID})
-            TriggerClientEvent('96rp-pager:pager:received', values.serverid, pagerUser.number, message)
+            TriggerClientEvent('96rp-pager:pager:received', values.serverid, pagerUser.number, 'Private message', message)
+            userFound = true
         end
+    end
+    if not userFound then
+        local pagerTune = Config.Pager[contact];
+
+        if(pagerTune == nil) then
+            TriggerClientEvent('ox_lib:notify', source, {
+                type = 'error',
+                description = "The paged channel does not exist."
+            })
+            return false;
+        end
+
+        local Player = exports.qbx_core:GetPlayer(source)
+        local authorized=false;
+
+        if pagerTune.jobPermissions ~= nil then
+            for k,v in ipairs(pagerTune.jobPermissions) do
+                if(Player.PlayerData.job.name == v) then
+                    authorized=true;
+                    break
+                end
+            end
+
+            if authorized == false then
+                TriggerClientEvent('ox_lib:notify', source, {
+                    type = 'error',
+                    description = "You are not authenticated to broadcast on the paged channel."
+                })
+                return false;
+            end
+
+        end
+
+        if pagerTune.discordPermissions ~= nil then
+            authorized=exports["pv-discord-uac"]:doesUserHaveAnyRole(source,pagerTune.discordPermissions);
+
+            if authorized == false then
+                TriggerClientEvent('ox_lib:notify', source, {
+                    type = 'error',
+                    description = "You are not authenticated to broadcast on the paged channel."
+                })
+                return false;
+            end
+        end
+        
+        if pagerTune.jobPermissions == nil and pagerTune.discordPermissions == nil then authorized=true end
+
+        if authorized then
+            local players = exports.qbx_core:GetQBPlayers()
+            for _, v in pairs(players) do
+                if(pagerTune.broadcastToJobs[v.PlayerData.job.name]) then
+                    local number = pagersList[v.PlayerData.citizenid].number
+                    if(pagerTune.broadcastToRoles ~= nil) then
+                        if(exports["pv-discord-uac"]:doesUserHaveAnyRole(v.PlayerData.source,pagerTune.broadcastToRoles)) then
+                            TriggerClientEvent("96rp-pager:pager:received",  v.PlayerData.source, number, contact, message);
+                        end
+                    else
+                        TriggerClientEvent("96rp-pager:pager:received",  v.PlayerData.source, number, contact, message);
+                    end
+
+                end
+            end
+        end
+
+        for k,v in ipairs(pagerTune.webhooks) do
+            SendToDiscord(k,pagerTune.title, message, v);
+        end
+
+        SendToDiscord(Config.LogWebhook,pagerTune.title, message, "New pager!",source,true);
     end
 end, false)
 
+--------------------------------------------------------------------------
+-- Saves a new contact
+--------------------------------------------------------------------------
 RegisterNetEvent('96rp-pager:server:SaveContact', function(name, number)
     local src = source
     local newID = GetNewID('pager_contacts')
@@ -137,6 +228,9 @@ RegisterNetEvent('96rp-pager:server:SaveContact', function(name, number)
     MySQL.insert.await('INSERT INTO pager_contacts_users (user, contact) VALUES (?, ?)', {citizenid, newID})
 end)
 
+--------------------------------------------------------------------------
+-- Removes given contact
+--------------------------------------------------------------------------
 RegisterNetEvent('96rp-pager:server:RemoveContact', function(number)
     local src = source
     local citizenid = exports.qbx_core:GetPlayer(src).PlayerData.citizenid
@@ -147,123 +241,34 @@ RegisterNetEvent('96rp-pager:server:RemoveContact', function(number)
     MySQL.single.await('DELETE FROM pager_contacts WHERE id = ?', {contactid})
 end)
 
--- function dump(o)
---     if type(o) == 'table' then
---         local s = '{ '
---         for k, v in pairs(o) do
---             if type(k) ~= 'number' then
---                 k = '"' .. k .. '"'
---             end
---             s = s .. '[' .. k .. '] = ' .. dump(v) .. ','
---         end
---         return s .. '} '
---     else
---         return tostring(o)
---     end
--- end
+function SendToDiscord(url,title,text, content,src, admin)
+    local embed = {
+        {
+            ["color"] = 10038562,
+            ["title"] = "Pager - " .. title,
+            ["description"] = text,
+        }
+    }
 
--- local function page(tune,text, src)
---     local pagerTune = Config.Pager[tune];
+    if(admin ~= nil and admin == true) then
 
---     if(pagerTune == nil) then
---         TriggerClientEvent('QBCore:Notify', src, "The paged channel does not exist.", 'error')
---         return false;
---     end
+        local discord="";
 
---     local Player = QBCore.Functions.GetPlayer(src)
---     local authorized=false;
+        for k, v in pairs(GetPlayerIdentifiers(src)) do
+            if string.sub(v, 1, string.len("discord:")) == "discord:" then
+                discord = v
+            end
+        end
 
---     if pagerTune.jobPermissions ~= nil then
---         for k,v in ipairs(pagerTune.jobPermissions) do
---             if(Player.PlayerData.job.name == v) then
---                 authorized=true;
---                 break
---             end
---         end
+        discord = string.gsub(discord, "discord:", "");
 
---         if authorized == false then
---             TriggerClientEvent('QBCore:Notify', src, "You are not authenticated to broadcast on the paged channel.", 'error');
---             return false;
---         end
+        embed[1].fields = {
+                {
+                    ["name"]="Sent by",
+                    ["value"]="<@" .. discord .. ">"
+                }
+        };
+    end
 
---     end
-
---     if pagerTune.discordPermissions ~= nil then
---         authorized=exports["pv-discord-uac"]:doesUserHaveAnyRole(src,pagerTune.discordPermissions);
-
---         if authorized == false then
---             TriggerClientEvent('QBCore:Notify', src, "You are not authenticated to broadcast on the paged channel.", 'error');
---             return false;
---         end
---     end
-    
---     if pagerTune.jobPermissions == nil and pagerTune.discordPermissions == nil then authorized=true end
-
---     if authorized then
---         local players = QBCore.Functions.GetQBPlayers()
---         for _, v in pairs(players) do
---             if(pagerTune.broadcastToJobs[v.PlayerData.job.name]) then
---                 if(pagerTune.broadcastToRoles ~= nil) then
-
---                     if(exports["pv-discord-uac"]:doesUserHaveAnyRole(v.PlayerData.source,pagerTune.broadcastToRoles)) then
---                         TriggerClientEvent("pv-pager:pager:received",  v.PlayerData.source, text);
---                     end
-
---                 else
---                     TriggerClientEvent("pv-pager:pager:received",  v.PlayerData.source, text);
---                 end
-
---             end
---         end
---     end
-
---     for k,v in ipairs(pagerTune.webhooks) do
---         sendToDiscord(k,pagerTune.title,text,v);
---     end
-
---     sendToDiscord(Config.LogWebhook,pagerTune.title,text, "New pager!",src,true);
--- end
-
--- QBCore.Commands.Add("page", "Use the pager", {}, false, function(source, args)
---     local src = source
-
---     local pagerTune = args[1];
---     args[1]="";
-
---     local text=table.concat(args, " ");
-
---     page(pagerTune,text,src);
--- end)
-
-
--- function sendToDiscord(url,title,text, content,src, admin)
---     local embed = {
---         {
---             ["color"] = 10038562,
---             ["title"] = "Pager - " .. title,
---             ["description"] = text,
---         }
---     }
-
---     if(admin ~= nil and admin == true) then
-
---         local discord="";
-
---         for k, v in pairs(GetPlayerIdentifiers(src)) do
---             if string.sub(v, 1, string.len("discord:")) == "discord:" then
---                 discord = v
---             end
---         end
-
---         discord = string.gsub(discord, "discord:", "");
-
---         embed[1].fields = {
---                 {
---                     ["name"]="Sent by",
---                     ["value"]="<@" .. discord .. ">"
---                 }
---         };
---     end
-
---     PerformHttpRequest(url, function(err, text, headers) end, 'POST', json.encode({username = "Pager", embeds = embed, content = content,}), { ['Content-Type'] = 'application/json' })
--- end
+    PerformHttpRequest(url, function(err, text, headers) end, 'POST', json.encode({username = "Pager", embeds = embed, content = content,}), { ['Content-Type'] = 'application/json' })
+end

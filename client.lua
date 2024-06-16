@@ -1,5 +1,3 @@
-local QBCore = exports['qb-core']:GetCoreObject()
-
 local number = ''
 local contacts = {}
 local messages = {}
@@ -10,12 +8,11 @@ local currentMessage = 1
 -- Gets pager data from server
 --------------------------------------------------------------------------
 function GetPagerData()
-    QBCore.Functions.TriggerCallback('96rp-pager:server:GetPagerData', function(pagerData)
-        number = pagerData.number
-        contacts = pagerData.contacts
-        messages = pagerData.messages
-        currentMessage = #messages
-    end)
+    local pagerData = lib.callback.await('96rp-pager:server:GetPagerData', false)
+    number = pagerData.number
+    contacts = pagerData.contacts
+    messages = pagerData.messages
+    currentMessage = #messages
 end
 
 
@@ -70,13 +67,16 @@ end
 function ShowMessage(message)
     local text = "No Messages found :("
     local contact = ""
+    local showReminder = false
     if message then
         contact = GetContactFromNumber(message.number)
-        text = string.format("Sender: %s<br>Nr%s: %s", contact, GetCurrentIndexReversed(currentMessage), message.text)
-    end
-    local showReminder = false
-    if message and contact == message.number then
-        showReminder = true
+        if not message.chatType then
+            message.chatType = 'Private message'
+        end
+        text = string.format("Sender: %s,<br> %s Nr%s:</br> %s", contact, message.chatType, GetCurrentIndexReversed(currentMessage), message.text)
+        if contact == message.number then
+            showReminder = true
+        end
     end
     SendNUIMessage({
         showReminder = showReminder,
@@ -103,6 +103,9 @@ function ShowContact(contact)
     currentMessage = #messages + 1
 end
 
+--------------------------------------------------------------------------
+-- Loads pager data after a player joined and finished loading
+--------------------------------------------------------------------------
 AddEventHandler('QBCore:Client:OnPlayerLoaded', function() 
     GetPagerData()
 end)
@@ -115,21 +118,21 @@ AddEventHandler('onResourceStart', function(resourceName)
     if (GetCurrentResourceName() ~= resourceName) then
         return
     end
-    print("resource started")
     GetPagerData()
 end)
 
 --------------------------------------------------------------------------
 -- Shows received message when triggered
 --------------------------------------------------------------------------
-RegisterNetEvent("96rp-pager:pager:received", function(senderNumber, message)
+RegisterNetEvent("96rp-pager:pager:received", function(senderNumber, chatType, message)
     local contact = GetContactFromNumber(senderNumber)
 	table.insert(messages, {
 		number = senderNumber,
+        chatType = chatType,
 		text = message
 	})
     SendNUIMessage({
-        text = string.format("Sender: %s,  </br> %s", contact, message),
+        text = string.format("Sender: %s,<br> %s:</br> %s", contact, chatType, message),
         action = "pagerReceived"
     })
 end)
