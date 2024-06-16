@@ -34,6 +34,7 @@ TODO:
    <li>send messages without command</li>
    <li>more sound effects</li>
    <li>more quallity of life functions</li>
+   <li>more config settings</li>
 </ul>
 
 
