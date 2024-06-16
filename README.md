@@ -54,7 +54,7 @@ TODO:
 },
 </pre>
 
-<h1>How to use:</h1>
+<h1>Script-Usage:</h1>
 <pre>
    command:
    /pager [contact] [message]
@@ -62,4 +62,23 @@ TODO:
    /pager Mama Hey im hungry                                          <- private message
    /pager 911p HELP! Someone is shooting near Los Santos Customs      <- police dispatch
    /pager policeChat Officer Jonson is ready for duty                 <- job groupchat
+</pre>
+
+<h1>Config-Usage</h1>
+<pre>
+   Config.Pager = {
+    ["911p"] = {                                                <- contact name (for /pager command)
+        title = "Police",                                       <- name for discord logs
+        broadcastToJobs = {                                     <- jobs that get the message
+            ["police"]=true,
+        },
+        broadcastToRoles = nil,                                 <- discord roles that get the messages
+        discordPermissions = nil,                               <- discord roles that are allowed to use this contact
+        jobPermissions = nil,                                   <- jobs that are allowed to use this contact
+        webhooks = {                                            <- webhook for discord messages
+            ["webhooklink"]="<@9189297405006602> new pager received!"
+        },
+    },
+  }
+  Config.LogWebhook = "";                                       <- webhook for discord logs
 </pre>
