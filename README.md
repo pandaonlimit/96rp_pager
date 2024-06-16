@@ -47,6 +47,6 @@ TODO:
 
 <h3>Add this inside items.lua:</h3>
 ['pager'] = {<br>
-   <div style="tab-size: 2;">label = 'Pager',</div>
-   <div style="tab-size: 2;">client = { event = "96rp-pager:pager:show" }</div>
+   <div style="tab-size: 5;">label = 'Pager',</div>
+   <div style="tab-size: 5;">client = { event = "96rp-pager:pager:show" }</div>
 },
