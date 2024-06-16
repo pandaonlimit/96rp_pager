@@ -53,3 +53,13 @@ TODO:
    client = { event = "96rp-pager:pager:show" }
 },
 </pre>
+
+<h1>How to use:</h1>
+<pre>
+   command:
+   /pager [contact] [message]
+   examples:
+   /pager Mama Hey im hungry                                          <- private message
+   /pager 911p HELP! Someone is shooting near Los Santos Customs      <- police dispatch
+   /pager policeChat Officer Jonson is ready for duty                 <- job groupchat
+</pre>
