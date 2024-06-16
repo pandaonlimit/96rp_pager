@@ -12,7 +12,7 @@ Right now, you can only use it with QBX-Core.<br>
 <p>
 Feel free to join our discord and support us if u want to :)<br>
 We dont sell anything and want to offer free scripts in the near future<br>
-You can also ask us for help or report bugs with a ticket in our discord!
+You can also ask us for help or report bugs with a ticket on our discord!
 </p>
 <h1><a href="https://discord.gg/96rp">discord.gg/96rp</a></h1>
 Current functions:
