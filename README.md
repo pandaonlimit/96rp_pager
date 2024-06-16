@@ -50,5 +50,5 @@ TODO:
 ['pager'] =
    label = 'Pager',
    client = { event = "96rp-pager:pager:show" }
-</pre>
 },
+</pre>
