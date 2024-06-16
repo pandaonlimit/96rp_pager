@@ -17,6 +17,8 @@ We dont sell anything and want to offer free scripts in the near future<br>
 Current functions:
 - can write messages via number or contact name
 - can save contacts
+- group messages for jobs
+- dispatches
 
 Comming soon:
 - better code quallity
@@ -26,3 +28,16 @@ TODO:
 - send messages without command
 - more sound effects
 - more quallity of life functions
+
+
+<h1>Installation-Instructions</h1>
+- download and unpack zip file or clone with git inside your resources folder
+- ensure the resource inside your server config
+- add pager as a item inside ox_inventory->data->items.lua
+- edit config.lua if needed and have fun
+
+<h3>Add this inside items.lua:</h3>
+['pager'] = {
+label = 'Pager',
+client = { event = "96rp-pager:pager:show" }
+},
