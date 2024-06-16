@@ -41,11 +41,12 @@ TODO:
    <li>download and unpack zip file or clone with git inside your resources folder</li>
    <li>ensure the resource inside your server config</li>
    <li>add pager as a item inside ox_inventory->data->items.lua</li>
+   <li>run .sql script with your database software</li>
    <li>edit config.lua if needed and have fun</li>
 </ul>
 
 <h3>Add this inside items.lua:</h3>
 ['pager'] = {<br>
-   label = 'Pager',<br>
-   client = { event = "96rp-pager:pager:show" }<br>
+   <div style="tab-size: 2;">label = 'Pager',</div>
+   <div style="tab-size: 2;">client = { event = "96rp-pager:pager:show" }</div>
 },
