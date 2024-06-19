@@ -35,6 +35,7 @@ TODO:
    <li>more sound effects</li>
    <li>more quallity of life functions</li>
    <li>more config settings</li>
+   <li>ready for multijob</li>
 </ul>
 
 
