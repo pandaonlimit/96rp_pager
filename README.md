@@ -26,6 +26,7 @@ Current functions:
 Comming soon:
 <ul>
    <li>better code quallity</li>
+   <li>less database usage</li>
 </ul>
    
 
