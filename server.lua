@@ -122,9 +122,9 @@ RegisterCommand("pager", function(source, args, rawCommand)
     local citizenid = exports.qbx_core:GetPlayer(source).PlayerData.citizenid
     local pagerUser = pagersList[citizenid]
     local contact = args[1]
-    if not tonumber(contact) then
+    if tonumber(contact) == nil then
         for _, contactData in pairs(pagerUser.contacts) do
-            if contactData.name == contact then
+            if string.upper(contactData.name) == string.upper(contact) then
                 contact = contactData.number
             end
         end
@@ -160,7 +160,7 @@ RegisterCommand("pager", function(source, args, rawCommand)
 
         if pagerTune.jobPermissions ~= nil then
             for k,v in ipairs(pagerTune.jobPermissions) do
-                if(Player.PlayerData.job.name == v) then
+                if(Player.PlayerData.jobs[v]) then
                     authorized=true;
                     break
                 end
@@ -224,7 +224,7 @@ RegisterNetEvent('96rp-pager:server:SaveContact', function(name, number)
     local citizenid = exports.qbx_core:GetPlayer(src).PlayerData.citizenid
 
     local row = MySQL.single.await('SELECT citizenid FROM pager_users WHERE number = ?', {number})
-    MySQL.insert.await('INSERT INTO pager_contacts (id, name, user) VALUES (?, ?, ?)', {newID , name, row['citizenid']})
+    MySQL.insert.await('INSERT INTO pager_contacts (id, name, user) VALUES (?, ?, ?)', {newID , string.upper(name), row['citizenid']})
     MySQL.insert.await('INSERT INTO pager_contacts_users (user, contact) VALUES (?, ?)', {citizenid, newID})
 end)
 
