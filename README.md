@@ -8,11 +8,20 @@
    This script was made in "NINETY SIX RP" as a mobile phone replacement!<br>
    Right now, you can only use it with QBX-Core.<br>
    (unless you can code and replace the events)<br>
+   its fully optimized with understandable code and it only uses the database<br>
+   every hour and before scheduled restarts if needed.<br>
+   You can also use /savePagers as an admin for saving data into the database!
 </p>
 <p>
    Feel free to join our discord and support us if u want to :)<br>
    We dont sell anything and want to offer free scripts in the near future<br>
    You can also ask us for help or report bugs with a ticket on our discord!
+</p>
+<p>
+   I have commented out "grabAudio.pause();" and "grabAudio.load();"<br>
+   in line 57-58 (nui/scripts.js) because the sound is annoying.
+   Just remove those "//" and you will be able to hear this sound.
+   credits: https://pixabay.com/sound-effects/item-received-85572/<br>
 </p>
 <h1><a href="https://discord.gg/96rp">discord.gg/96rp</a></h1>
 Current functions:
@@ -23,19 +32,9 @@ Current functions:
    <li>dispatches</li>
 </ul>
 
-Comming soon:
-<ul>
-   <li>better code quallity</li>
-   <li>less database usage</li>
-</ul>
-   
-
 TODO:
 <ul>
    <li>send messages without command</li>
-   <li>more sound effects</li>
-   <li>more quallity of life functions</li>
-   <li>more config settings</li>
    <li>ready for multijob</li>
 </ul>
 
