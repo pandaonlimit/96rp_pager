@@ -3,6 +3,8 @@ local contacts = {}
 local messages = {}
 local currentContact = 1
 local currentMessage = 1
+local currentPagerObj = 0
+local isPagerActive = false
 
 --------------------------------------------------------------------------
 -- Gets pager data from server
@@ -108,6 +110,11 @@ end
 --------------------------------------------------------------------------
 AddEventHandler('QBCore:Client:OnPlayerLoaded', function() 
     GetPagerData()
+    -- request animations
+    lib.requestAnimDict(Config.Animations.usePager.dict)
+    lib.requestAnimDict(Config.Animations.getPagerOutOfPocket.dict)
+    lib.requestAnimDict(Config.Animations.putPagerInPocket.dict)
+    lib.requestModel(Config.PagerObj)
 end)
 
 --------------------------------------------------------------------------
@@ -143,19 +150,72 @@ end)
 --  when the pager is used)
 --------------------------------------------------------------------------
 RegisterNetEvent("96rp-pager:pager:show", function()
+    isPagerActive = true
+    -- show ui
     SetNuiFocus(true, true)
     SendNUIMessage({
         text = string.format("Welcome :)<br> Your number: %s", number),
         action = "pagerShowMessageSimple"
     })
     currentMessage = #messages + 1
+
+    -- trigger getPagerOutOfPocket animation
+    local playerPed = PlayerPedId()
+    TriggerServerEvent('96rp-pager:server:PlayAnimation', 'getPagerOutOfPocket')
+    while not IsEntityPlayingAnim(playerPed, Config.Animations.getPagerOutOfPocket.dict, Config.Animations.getPagerOutOfPocket.name, 3) do
+        Wait(0)
+    end
+    Wait(1000)
+    
+    -- delete last pager (if player spamms animation)
+    if DoesEntityExist(currentPagerObj) then
+        DeleteEntity(currentPagerObj)
+    end
+
+    -- attach entity to players hand
+    local playerCoords = GetEntityCoords(playerPed)
+    currentPagerObj = CreateObject(Config.PagerObj, playerCoords.x, playerCoords.y, playerCoords.z + 3, true, false, false)
+    local boneIndex = GetPedBoneIndex(playerPed, 28422)
+    local x = 0.0
+    local y = 0.0
+    local z = 0.0
+    local rotX = 0.0
+    local rotY = 0.0
+    local rotZ = 0.0
+    local p9 = false
+    local useSoftPinning = false
+    local collision = false
+    local isPed = false
+    local rotationorder = 2
+    local syncRotation = true
+    AttachEntityToEntity(currentPagerObj, playerPed, boneIndex, x, y, z, rotX, rotY, rotZ, p9, useSoftPinning, collision, isPed, rotationorder, syncRotation)
+    
+    -- wait for getPagerOutOfPocket animation to stop
+    local timeLeft = Config.Animations.getPagerOutOfPocket.time / 20
+    while timeLeft > 0 and isPagerActive do
+        timeLeft = timeLeft - 1
+        Wait(1)
+    end
+
+    -- timeLeft wont be <=0 if player spam-open-closes the pager and the usePager animation wont play
+    if timeLeft <= 0 then
+        TriggerServerEvent('96rp-pager:server:PlayAnimation', 'usePager')
+    end
 end)
 
 --------------------------------------------------------------------------
 -- Closes pager
 --------------------------------------------------------------------------
 RegisterNUICallback('dismissPager', function(data, cb)
+    isPagerActive = false
     SetNuiFocus(false, false)
+
+    -- play putPagerInPocket and delete pagerObj
+    TriggerServerEvent('96rp-pager:server:PlayAnimation', 'putPagerInPocket')
+    Wait(Config.Animations.putPagerInPocket.time)
+    if DoesEntityExist(currentPagerObj) and not isPagerActive then
+        DeleteEntity(currentPagerObj)
+    end
     cb('')
 end)
 
@@ -163,7 +223,6 @@ end)
 -- Saves or Removes current contact
 --------------------------------------------------------------------------
 RegisterNUICallback('interactWithContact', function(pagerData, cb)
-    print(json.encode(pagerData))
     if pagerData.interaction == "save" then
         local message = messages[currentMessage]
         table.insert(contacts, {
@@ -173,17 +232,20 @@ RegisterNUICallback('interactWithContact', function(pagerData, cb)
         TriggerServerEvent('96rp-pager:server:SaveContact', pagerData.value, message.number)
         ShowMessage(message)
     elseif pagerData.interaction == "delete" then
+        -- remove contact from client and server
         local contact = contacts[currentContact]
         table.remove(contacts, currentContact)
 		TriggerServerEvent('96rp-pager:server:RemoveContact', contact.number)
         currentContact = 1
+
+        -- refresh ui and show an other contact if exists
         local contactLeft = nil
         if #contacts > 0 then
             contactLeft = contacts[currentContact]
         end
         ShowContact(contactLeft)
     end
-    cb("test")
+    cb('')
 end)
 
 --------------------------------------------------------------------------
@@ -225,7 +287,15 @@ RegisterNUICallback('showContactRight', function(data, cb)
     ShowContact(contact)
     cb('')
 end)
+
 --------------------------------------------------------------------------
--- Keyboard interaction for closing pager
+-- Keyboard interaction for closing pager (not working yet)
 --------------------------------------------------------------------------
 RegisterKeyMapping('dismisspager', 'Dismiss a pager', 'keyboard', 'x')
+
+--------------------------------------------------------------------------
+-- Closes NUI command for bugs from other scripts
+--------------------------------------------------------------------------
+RegisterCommand("closeNUI", function(source, args, rawCommand)
+	SetNuiFocus(false, false)
+end, false)

@@ -1,14 +1,16 @@
 window.addEventListener('load', function () {
     var resourceName = GetParentResourceName();
-    var audio = new Audio('pager_beeps.mp3');
+    var beepAudio = new Audio('pager_beeps.mp3');
+    var grabAudio = new Audio('grabPager.mp3');
     var textElement = document.getElementById("text");
     var pagerElement = document.getElementById("pager");
     var reminderElement = document.getElementById('reminder');
     var saveContactElement = document.getElementById('saveContact');
-    var saveMessage = "save"
-    var deleteMessage = "delete"
-    let currentInteraction = null
-    audio.volume=0.3;
+    var saveMessage = "save";
+    var deleteMessage = "delete";
+    let currentInteraction = null;
+    beepAudio.volume=0.3;
+    grabAudio.volume=1.0;
     var t=null;
 
     /* Eventlisteners lua->js communication */
@@ -31,12 +33,15 @@ window.addEventListener('load', function () {
     function pagerShowMessageSimple(text){
         textElement.innerHTML = text;
         pagerElement.style.display = "block";
+        // t=setTimeout(()=>{
+        //     grabAudio.play();
+        // }, 300);
     }
 
     /* Shows the given text, plays an audio and closes the pager */
     function pagerReceived(text){
         pagerShowMessageSimple(text)
-        audio.play();
+        beepAudio.play();
 
         t=setTimeout(()=>{
             pagerElapssed();
@@ -47,12 +52,14 @@ window.addEventListener('load', function () {
     /* Closes the pager */
     function pagerElapssed(){
         pagerElement.style.display = "none";
-        audio.pause();
-        audio.load();
+        beepAudio.pause();
+        beepAudio.load();
+        // grabAudio.pause();
+        // grabAudio.load();
 
         saveContactElement.style.display = "none";
         reminderElement.style.display = "none";
-        currentInteraction = null
+        currentInteraction = null;
 
         if(t !== null) clearTimeout(t);        
         
