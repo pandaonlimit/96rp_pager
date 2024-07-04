@@ -19,9 +19,9 @@
 </p>
 <p>
    I have commented out "grabAudio.pause();" and "grabAudio.load();"<br>
-   in line 57-58 (nui/scripts.js) because the sound is annoying.
-   Just remove those "//" and you will be able to hear this sound.
-   credits: https://pixabay.com/sound-effects/item-received-85572/<br>
+   in line 57-58 (nui/scripts.js) because the sound is annoying.<br>
+   Just remove those "//" and you will be able to hear this sound.<br>
+   credits: https://pixabay.com/sound-effects/item-received-85572/
 </p>
 <h1><a href="https://discord.gg/96rp">discord.gg/96rp</a></h1>
 Current functions:
